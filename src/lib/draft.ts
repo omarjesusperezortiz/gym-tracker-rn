@@ -49,7 +49,9 @@ export interface InProgressSession {
 export async function listInProgress(totalForSlot: (plan: string, sess: string) => number | null): Promise<InProgressSession[]> {
   const keys = (await AsyncStorage.getAllKeys()).filter((k) => k.startsWith(DRAFT_PREFIX));
   if (!keys.length) return [];
-  const entries = await AsyncStorage.getMany(keys);
+  const pairs = await AsyncStorage.multiGet(keys);
+  const entries: Record<string, string | null> = {};
+  for (const [k, v] of pairs) entries[k] = v;
   const out: InProgressSession[] = [];
   for (const key of keys) {
     const raw = entries[key];
